@@ -2,6 +2,7 @@ package com.example.newmynotesapp.helper;
 
 import android.database.Cursor;
 
+import com.example.newmynotesapp.db.DatabaseContract;
 import com.example.newmynotesapp.entity.Note;
 
 import java.util.ArrayList;
@@ -25,5 +26,14 @@ public class MappingHelper {
             notes.add(new Note(id, title, description, date));
         }
         return notes;
+    }
+    public static Note mapCursorToObject(Cursor noteCursor){
+        noteCursor.moveToFirst();
+        int id = noteCursor.getInt(noteCursor.getColumnIndexOrThrow(_ID));
+        String title = noteCursor.getString(noteCursor.getColumnIndexOrThrow(TITLE));
+        String description = noteCursor.getString(noteCursor.getColumnIndexOrThrow(DESCRIPTION));
+        String date = noteCursor.getString(noteCursor.getColumnIndexOrThrow(DATE));
+
+        return new Note(id, title, description, date);
     }
 }

@@ -3,6 +3,8 @@ package com.example.newmynotesapp;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -18,12 +20,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.newmynotesapp.db.NoteHelper;
 import com.example.newmynotesapp.entity.Note;
+import com.example.newmynotesapp.helper.MappingHelper;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import javax.xml.transform.URIResolver;
+
+import static com.example.newmynotesapp.db.DatabaseContract.NoteColumns.CONTENT_URI;
 import static com.example.newmynotesapp.db.DatabaseContract.NoteColumns.DATE;
 import static com.example.newmynotesapp.db.DatabaseContract.NoteColumns.DESCRIPTION;
 import static com.example.newmynotesapp.db.DatabaseContract.NoteColumns.TITLE;
@@ -36,7 +42,8 @@ public class NoteAddUpdateActivity extends AppCompatActivity implements View.OnC
     private boolean isEdit = false;
     private Note note;
     private int position;
-    private NoteHelper noteHelper;
+//    private NoteHelper noteHelper;
+    private Uri uriWithId;
 
     public static final String EXTRA_NOTE = "extra_note";
     public static final String EXTRA_POSITION = "extra_position";
@@ -58,7 +65,7 @@ public class NoteAddUpdateActivity extends AppCompatActivity implements View.OnC
         edtDescription = findViewById(R.id.description);
         submit = findViewById(R.id.btn_submit);
 
-        noteHelper = NoteHelper.getInstance(getApplicationContext());
+//        noteHelper = NoteHelper.getInstance(getApplicationContext());
 
         note = getIntent().getParcelableExtra(EXTRA_NOTE);
         if (note != null) {
@@ -73,6 +80,17 @@ public class NoteAddUpdateActivity extends AppCompatActivity implements View.OnC
         String btnTitle;
 
         if (isEdit){
+            // Uri yang di dapatkan disini akan digunakan untuk ambil data dari provider
+            // content://com.dicoding.picodiploma.mynotesapp/note/id
+            uriWithId = Uri.parse(CONTENT_URI + "/" + note.getId());
+            if (uriWithId != null){
+                Cursor cursor = getContentResolver().query(uriWithId, null, null,null, null);
+
+                if (cursor != null){
+                    note = MappingHelper.mapCursorToObject(cursor);
+                    cursor.close();
+                }
+            }
             actionBar = "ubah";
             btnTitle = "update";
             if (note != null) {
@@ -119,28 +137,20 @@ public class NoteAddUpdateActivity extends AppCompatActivity implements View.OnC
             value.put(DATE, getCurrentDate());
 
             if (isEdit) {
-                long result = noteHelper.update(String.valueOf(note.getId()), value); //cuma butuh 1 parameter karena nambah data cukup isikan datanya tidak perlu pake id keuali id nya bukan auto increment
-                if (result > 0) {
-                    setResult(RESULT_UPDATE, mIntent);
-                    finish();
-                } else {
-                    Toast.makeText(NoteAddUpdateActivity.this, "Gagal mengupdate data", Toast.LENGTH_SHORT).show();
-                }
+                // Gunakan uriWithId untuk update
+                // content://com.dicoding.picodiploma.mynotesapp/note/id
+//                long result = noteHelper.update(String.valueOf(note.getId()), value); //cuma butuh 1 parameter karena nambah data cukup isikan datanya tidak perlu pake id keuali id nya bukan auto increment
+                getContentResolver().update(uriWithId, value, null, null);
+                Toast.makeText(NoteAddUpdateActivity.this, "Item berhasil di edit", Toast.LENGTH_SHORT).show();
+                finish();
             }else {
                 note.setDate(getCurrentDate());
                 value.put(DATE, getCurrentDate());
-                long result = noteHelper.insert(value);
-                System.out.println(result);
-                System.out.println(value);
-                if (result > 0) {
-                    note.setId((int) result);
-                    setResult(RESULT_ADD, mIntent);
-                    finish();
-                } else {
-                    Toast.makeText(NoteAddUpdateActivity.this, "Gagal menambah data", Toast.LENGTH_SHORT).show();
-                }
-
-
+                // Gunakan content uri untuk insert
+                // content://com.dicoding.picodiploma.mynotesapp/note/
+                getContentResolver().insert(CONTENT_URI, value);
+                Toast.makeText(NoteAddUpdateActivity.this, "satu item berhasil di tambahkan", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }
     }
@@ -202,16 +212,11 @@ public class NoteAddUpdateActivity extends AppCompatActivity implements View.OnC
                         if (isDialogClose) {
                             fileList();
                         }else {
-                            long result = noteHelper .deleteById(String.valueOf(note.getId()));
-                            if (result > 0) {
-                                Intent mIntent = new Intent();
-                                mIntent.putExtra(EXTRA_POSITION, position);
-                                setResult(RESULT_DELETE, mIntent);
-                                finish();
-                            }
-                            else {
-                                Toast.makeText(NoteAddUpdateActivity.this, "gagal menghapus data", Toast.LENGTH_SHORT).show();
-                            }
+                            // Gunakan uriWithId untuk delete
+                            // content://com.dicoding.picodiploma.mynotesapp/note/id
+                            getContentResolver().delete(uriWithId, null, null);
+                            Toast.makeText(NoteAddUpdateActivity.this, "gagal menghapus data", Toast.LENGTH_SHORT).show();
+                            finish();
                         }
                     }
                 })
