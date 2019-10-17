@@ -1,4 +1,4 @@
-package com.example.newmynotesapp;
+package com.example.consumerapps;
 
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -18,18 +18,18 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.newmynotesapp.entity.Note;
-import com.example.newmynotesapp.helper.MappingHelper;
+import com.example.consumerapps.entity.Note;
+import com.example.consumerapps.helper.MappingHelper;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static com.example.newmynotesapp.db.DatabaseContract.NoteColumns.CONTENT_URI;
-import static com.example.newmynotesapp.db.DatabaseContract.NoteColumns.DATE;
-import static com.example.newmynotesapp.db.DatabaseContract.NoteColumns.DESCRIPTION;
-import static com.example.newmynotesapp.db.DatabaseContract.NoteColumns.TITLE;
+import static com.example.consumerapps.db.DatabaseContract.NoteColumns.CONTENT_URI;
+import static com.example.consumerapps.db.DatabaseContract.NoteColumns.DATE;
+import static com.example.consumerapps.db.DatabaseContract.NoteColumns.DESCRIPTION;
+import static com.example.consumerapps.db.DatabaseContract.NoteColumns.TITLE;
 
 
 public class NoteAddUpdateActivity extends AppCompatActivity implements View.OnClickListener{
@@ -212,7 +212,7 @@ public class NoteAddUpdateActivity extends AppCompatActivity implements View.OnC
                             // Gunakan uriWithId untuk delete
                             // content://com.dicoding.picodiploma.mynotesapp/note/id
                             getContentResolver().delete(uriWithId, null, null);
-                            Toast.makeText(NoteAddUpdateActivity.this, "satu item berhasil di hapus", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(NoteAddUpdateActivity.this, "gagal menghapus data", Toast.LENGTH_SHORT).show();
                             finish();
                         }
                     }
